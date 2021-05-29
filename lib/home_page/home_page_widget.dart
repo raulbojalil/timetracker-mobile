@@ -1,6 +1,11 @@
+import 'package:timetracker_mobile/const.dart';
+import 'package:timetracker_mobile/models/timetrackerentry.dart';
+
 import '../add_new_page/add_new_page_widget.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
+
+import '../timetracker.dart';
 
 class HomePageWidget extends StatefulWidget {
   HomePageWidget({Key key}) : super(key: key);
@@ -11,6 +16,26 @@ class HomePageWidget extends StatefulWidget {
 
 class _HomePageWidgetState extends State<HomePageWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
+  var isLoading = false;
+  List<TimeTrackerEntry> list = [];
+
+  void loadTimeTrackerTimes() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    await TimeTracker.login(Constants.USERNAME, Constants.PASSWORD);
+    list = await TimeTracker.listaTimeTracker('01/05/2021', '28/05/2021');
+
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  @override
+  void initState() {
+    loadTimeTrackerTimes();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +46,9 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddNewPageWidget(),
+              builder: (context) => AddNewPageWidget(() {
+                loadTimeTrackerTimes();
+              }),
             ),
           );
         },
@@ -80,30 +107,35 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                 ],
               ),
             ),
-            // Expanded(
-            //   child: ListView(
-            //     padding: EdgeInsets.zero,
-            //     scrollDirection: Axis.vertical,
-            //     children: [
-            //       ListTile(
-            //         title: Text(
-            //           'Lorem ipsum dolor...',
-            //           style: FlutterFlowTheme.title3.override(
-            //             fontFamily: 'Poppins',
-            //           ),
-            //         ),
-            //         subtitle: Text(
-            //           'Lorem ipsum dolor...',
-            //           style: FlutterFlowTheme.subtitle2.override(
-            //             fontFamily: 'Poppins',
-            //           ),
-            //         ),
-            //         tileColor: Color(0xFFF5F5F5),
-            //         dense: false,
-            //       )
-            //     ],
-            //   ),
-            // )
+            isLoading
+                ? Center(child: Text("Loading..."))
+                : Expanded(
+                    child: ListView.separated(
+                        itemCount: list.length,
+                        padding: EdgeInsets.zero,
+                        scrollDirection: Axis.vertical,
+                        separatorBuilder: (BuildContext context, int index) =>
+                            Divider(),
+                        itemBuilder: (BuildContext context, int index) {
+                          final item = list[index];
+                          return ListTile(
+                            title: Text(
+                              item.description,
+                              style: FlutterFlowTheme.title3.override(
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            subtitle: Text(
+                              "${item.hours} hour(s) on ${item.date}",
+                              style: FlutterFlowTheme.subtitle2.override(
+                                fontFamily: 'Poppins',
+                              ),
+                            ),
+                            tileColor: Color(0xFFF5F5F5),
+                            dense: false,
+                          );
+                        }),
+                  )
           ],
         ),
       ),

@@ -29,12 +29,12 @@ dependencies:
   font_awesome_flutter:
   google_fonts:
   url_launcher:
+  html:
   lottie: ^1.0.1
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
-  web_scraper:
 
 dev_dependencies:
   flutter_test:

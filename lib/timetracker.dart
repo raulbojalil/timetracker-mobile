@@ -1,96 +1,101 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:web_scraper/web_scraper.dart';
+import 'package:html/parser.dart' show parse;
+
+import 'models/timetrackerentry.dart';
 
 class TimeTracker {
   static dynamic _cookies;
 
   static Future<String> login(username, password) async {
-    final webScraper = WebScraper();
     final getHtml =
         await _httpRequest("https://timetracker.bairesdev.com", "get", null);
 
-    webScraper.loadFromString(getHtml);
-    final viewState =
-        webScraper.getElement('input[name="__VIEWSTATE"]', ['value'])[0]
-            ["attributes"]["value"];
-    final viewStateGenerator = webScraper
-            .getElement('input[name="__VIEWSTATEGENERATOR"]', ['value'])[0]
-        ["attributes"]["value"];
-    final eventValidation =
-        webScraper.getElement('input[name="__EVENTVALIDATION"]', ['value'])[0]
-            ["attributes"]["value"];
+    final document = parse(getHtml);
 
     final postHtml =
         await _httpRequest("https://timetracker.bairesdev.com/", "post", {
       '__EVENTTARGET': '',
       '__EVENTARGUMENT': '',
-      '__VIEWSTATE': viewState,
-      '__VIEWSTATEGENERATOR': viewStateGenerator,
-      '__EVENTVALIDATION': eventValidation,
+      '__VIEWSTATE': document
+          .querySelector('input[name="__VIEWSTATE"]')
+          .attributes['value'],
+      '__VIEWSTATEGENERATOR': document
+          .querySelector('input[name="__VIEWSTATEGENERATOR"]')
+          .attributes['value'],
+      '__EVENTVALIDATION': document
+          .querySelector('input[name="__EVENTVALIDATION"]')
+          .attributes['value'],
       'ctl00\$ContentPlaceHolder\$UserNameTextBox': username,
       'ctl00\$ContentPlaceHolder\$PasswordTextBox': password,
-      'ctl00\$ContentPlaceHolder\$LoginButton': 'Login',
-      'ctl00\$ContentPlaceHolder\$clientTimezoneOffset': '300',
+      'ctl00\$ContentPlaceHolder\$LoginButton': 'Login'
     });
 
     return postHtml;
   }
 
-  static Future<String> listaTimeTracker(start, end) async {
-    final webScraper = WebScraper();
+  static Future<List<TimeTrackerEntry>> listaTimeTracker(start, end) async {
     final getHtml = await _httpRequest(
         "https://timetracker.bairesdev.com/ListaTimeTracker.aspx", "get", null);
 
-    webScraper.loadFromString(getHtml);
+    final document = parse(getHtml);
 
     final postHtml = await _httpRequest(
         "https://timetracker.bairesdev.com/ListaTimeTracker.aspx", "post", {
       '__EVENTTARGET': 'ctl00\$ContentPlaceHolder\$AplicarFiltroLinkButton',
       '__EVENTARGUMENT': '',
-      '__VIEWSTATE':
-          webScraper.getElement('input[name="__VIEWSTATE"]', ['value'])[0]
-              ["attributes"]["value"],
-      '__VIEWSTATEGENERATOR': webScraper
-              .getElement('input[name="__VIEWSTATEGENERATOR"]', ['value'])[0]
-          ["attributes"]["value"],
+      '__VIEWSTATE': document
+          .querySelector('input[name="__VIEWSTATE"]')
+          .attributes['value'],
+      '__VIEWSTATEGENERATOR': document
+          .querySelector('input[name="__VIEWSTATEGENERATOR"]')
+          .attributes['value'],
       '__VIEWSTATEENCRYPTED': '',
-      '__EVENTVALIDATION':
-          webScraper.getElement('input[name="__EVENTVALIDATION"]', ['value'])[0]
-              ["attributes"]["value"],
+      '__EVENTVALIDATION': document
+          .querySelector('input[name="__EVENTVALIDATION"]')
+          .attributes['value'],
       'ctl00\$ContentPlaceHolder\$txtFrom': start,
       'ctl00\$ContentPlaceHolder\$txtTo': end
     });
 
-    final responseWebScraper = WebScraper();
-    responseWebScraper.loadFromString(postHtml);
+    final postDocument = parse(postHtml);
 
-    return postHtml;
+    final tableRows = postDocument.querySelectorAll('.tbl-respuestas tr');
+
+    List<TimeTrackerEntry> list = [];
+
+    for (var row in tableRows) {
+      final cols = row.getElementsByTagName("td");
+      if (cols.length > 0 && cols[0].innerHtml != "&nbsp;") {
+        list.add(TimeTrackerEntry(cols[0].innerHtml, cols[1].innerHtml,
+            cols[2].innerHtml, cols[3].innerHtml, cols[4].innerHtml));
+      }
+    }
+
+    return list;
   }
 
   static Future<String> cargaTimeTracker(from, idProyecto, tiempo,
       idTipoAsignacion, descripcion, idFocalPointClient) async {
-    final webScraper = WebScraper();
-
     final getHtml = await _httpRequest(
         "https://timetracker.bairesdev.com/CargaTimeTracker.aspx", "get", null);
 
-    webScraper.loadFromString(getHtml);
+    final document = parse(getHtml);
 
     final loadProjectIntoSessionHtml = await _httpRequest(
         "https://timetracker.bairesdev.com/CargaTimeTracker.aspx", "post", {
       'ctl00\$ContentPlaceHolder\$ScriptManager':
           'ctl00\$ContentPlaceHolder\$UpdatePanel1|ctl00\$ContentPlaceHolder\$idProyectoDropDownList',
-      '__VIEWSTATE':
-          webScraper.getElement('input[name="__VIEWSTATE"]', ['value'])[0]
-              ["attributes"]["value"],
-      '__VIEWSTATEGENERATOR': webScraper
-              .getElement('input[name="__VIEWSTATEGENERATOR"]', ['value'])[0]
-          ["attributes"]["value"],
-      '__EVENTVALIDATION':
-          webScraper.getElement('input[name="__EVENTVALIDATION"]', ['value'])[0]
-              ["attributes"]["value"],
+      '__VIEWSTATE': document
+          .querySelector('input[name="__VIEWSTATE"]')
+          .attributes['value'],
+      '__VIEWSTATEGENERATOR': document
+          .querySelector('input[name="__VIEWSTATEGENERATOR"]')
+          .attributes['value'],
+      '__EVENTVALIDATION': document
+          .querySelector('input[name="__EVENTVALIDATION"]')
+          .attributes['value'],
       'ctl00\$ContentPlaceHolder\$txtFrom': from,
       'ctl00\$ContentPlaceHolder\$idProyectoDropDownList': idProyecto,
       'ctl00\$ContentPlaceHolder\$DescripcionTextBox': '',

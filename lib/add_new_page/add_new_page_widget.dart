@@ -3,14 +3,16 @@ import 'package:timetracker_mobile/timetracker.dart';
 
 import '../flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 
 class AddNewPageWidget extends StatefulWidget {
-  AddNewPageWidget({Key key}) : super(key: key);
+  final Function onEntryAdded;
+
+  AddNewPageWidget(this.onEntryAdded);
 
   @override
-  _AddNewPageWidgetState createState() => _AddNewPageWidgetState();
+  _AddNewPageWidgetState createState() =>
+      _AddNewPageWidgetState(this.onEntryAdded);
 }
 
 class _AddNewPageWidgetState extends State<AddNewPageWidget> {
@@ -19,6 +21,10 @@ class _AddNewPageWidgetState extends State<AddNewPageWidget> {
   TextEditingController textController3;
   bool isLoading = false;
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  Function onEntryAdded;
+
+  _AddNewPageWidgetState(this.onEntryAdded);
 
   @override
   void initState() {
@@ -60,6 +66,7 @@ class _AddNewPageWidgetState extends State<AddNewPageWidget> {
 
                             await TimeTracker.login(
                                 Constants.USERNAME, Constants.PASSWORD);
+
                             await TimeTracker.cargaTimeTracker(
                                 textController1.text,
                                 Constants.PROJECT_ID,
@@ -73,6 +80,10 @@ class _AddNewPageWidgetState extends State<AddNewPageWidget> {
                             });
 
                             Navigator.pop(context);
+
+                            if (onEntryAdded != null) {
+                              onEntryAdded();
+                            }
                           },
                           icon: Icon(
                             Icons.check,
