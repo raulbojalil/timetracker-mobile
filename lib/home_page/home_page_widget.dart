@@ -1,7 +1,6 @@
+import 'package:timetracker_mobile/add_new_entry/add_new_entry_widget.dart';
 import 'package:timetracker_mobile/const.dart';
 import 'package:timetracker_mobile/models/timetrackerentry.dart';
-
-import '../add_new_page/add_new_page_widget.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -46,7 +45,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddNewPageWidget(() {
+              builder: (context) => AddNewEntryWidget(() {
                 loadTimeTrackerTimes();
               }),
             ),

@@ -4,34 +4,37 @@ import 'package:timetracker_mobile/timetracker.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
+import 'package:intl/intl.dart';
 
-class AddNewPageWidget extends StatefulWidget {
+class AddNewEntryWidget extends StatefulWidget {
   final Function onEntryAdded;
 
-  AddNewPageWidget(this.onEntryAdded);
+  AddNewEntryWidget(this.onEntryAdded);
 
   @override
-  _AddNewPageWidgetState createState() =>
-      _AddNewPageWidgetState(this.onEntryAdded);
+  _AddNewEntryWidgetState createState() =>
+      _AddNewEntryWidgetState(this.onEntryAdded);
 }
 
-class _AddNewPageWidgetState extends State<AddNewPageWidget> {
-  TextEditingController textController1;
-  TextEditingController textController2;
-  TextEditingController textController3;
+class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
+  TextEditingController dateController;
+  TextEditingController hoursController;
+  TextEditingController descriptionController;
   bool isLoading = false;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   Function onEntryAdded;
 
-  _AddNewPageWidgetState(this.onEntryAdded);
+  _AddNewEntryWidgetState(this.onEntryAdded);
 
   @override
   void initState() {
     super.initState();
-    textController1 = TextEditingController();
-    textController2 = TextEditingController();
-    textController3 = TextEditingController();
+    dateController = TextEditingController();
+    dateController.text =
+        DateFormat('dd/MM/yyyy').format(DateTime.now()).toString();
+    hoursController = TextEditingController();
+    descriptionController = TextEditingController();
   }
 
   @override
@@ -68,11 +71,11 @@ class _AddNewPageWidgetState extends State<AddNewPageWidget> {
                                 Constants.USERNAME, Constants.PASSWORD);
 
                             await TimeTracker.cargaTimeTracker(
-                                textController1.text,
+                                dateController.text,
                                 Constants.PROJECT_ID,
-                                textController2.text,
+                                hoursController.text,
                                 Constants.ASSIGNMENT_TYPE_ID,
-                                textController3.text,
+                                descriptionController.text,
                                 Constants.FOCAL_POINT_ID);
 
                             setState(() {
@@ -101,7 +104,7 @@ class _AddNewPageWidgetState extends State<AddNewPageWidget> {
                     Padding(
                       padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
                       child: TextFormField(
-                        controller: textController1,
+                        controller: dateController,
                         obscureText: false,
                         decoration: InputDecoration(
                           labelText: 'Date',
@@ -133,6 +136,18 @@ class _AddNewPageWidgetState extends State<AddNewPageWidget> {
                           ),
                           filled: true,
                         ),
+                        onTap: () async {
+                          var date = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime(2100));
+
+                          if (date != null)
+                            dateController.text = DateFormat('dd/MM/yyyy')
+                                .format(date)
+                                .toString();
+                        },
                         style: FlutterFlowTheme.bodyText1.override(
                           fontFamily: 'Poppins',
                         ),
@@ -141,8 +156,9 @@ class _AddNewPageWidgetState extends State<AddNewPageWidget> {
                     Padding(
                       padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
                       child: TextFormField(
-                        controller: textController2,
+                        controller: hoursController,
                         obscureText: false,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                           labelText: 'Hours',
                           hintStyle: FlutterFlowTheme.bodyText1.override(
@@ -178,7 +194,7 @@ class _AddNewPageWidgetState extends State<AddNewPageWidget> {
                     Padding(
                       padding: EdgeInsets.fromLTRB(0, 30, 0, 0),
                       child: TextFormField(
-                        controller: textController3,
+                        controller: descriptionController,
                         obscureText: false,
                         decoration: InputDecoration(
                           labelText: 'Description',
@@ -211,6 +227,12 @@ class _AddNewPageWidgetState extends State<AddNewPageWidget> {
                           fontFamily: 'Poppins',
                         ),
                         maxLines: 6,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter some text';
+                          }
+                          return null;
+                        },
                       ),
                     )
                   ],
