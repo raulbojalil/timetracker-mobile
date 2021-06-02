@@ -1,16 +1,26 @@
-# timetracker_mobile
+# Time Tracker Mobile
 
-A new Flutter project.
+> A Flutter frontend for the [TimeTracker](https://timetracker.bairesdev.com). Runs on Android, iOS, Windows and Mac OS.
 
-## Getting Started
+## Usage
 
-This project is a starting point for a Flutter application.
+Fill the timetracker-mobile/lib/const.dart file with your credentials and IDs (you can get these by inspecting the TT site)
 
-A few resources to get you started if this is your first Flutter project:
+```dart
+class Constants {
+  static const USERNAME = '';
+  static const PASSWORD = '';
+  static const ASSIGNMENT_TYPE_ID = '';
+  static const FOCAL_POINT_ID = '';
+  static const PROJECT_ID = '';
+}
+```
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+Run on your favorite platform! (not working on Flutter Web due to CORS)
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Screens
+
+![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/image_1.png?raw=true "timetracker1")
+![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/image_2.png?raw=true "timetracker2")
+
+
