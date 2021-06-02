@@ -1,3 +1,4 @@
+import 'package:intl/intl.dart';
 import 'package:timetracker_mobile/add_new_entry/add_new_entry_widget.dart';
 import 'package:timetracker_mobile/const.dart';
 import 'package:timetracker_mobile/models/timetrackerentry.dart';
@@ -23,8 +24,16 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       isLoading = true;
     });
 
+    final now = DateTime.now();
+    final startDateTime = new DateTime(now.year, now.month, 1);
+    final endDateTime =
+        new DateTime(now.year, (now.month + 1 == 13 ? 1 : now.month + 1), 1)
+            .subtract(Duration(days: 1));
+
     await TimeTracker.login(Constants.USERNAME, Constants.PASSWORD);
-    list = await TimeTracker.listaTimeTracker('01/05/2021', '28/05/2021');
+    list = await TimeTracker.listaTimeTracker(
+        DateFormat('dd/MM/yyyy').format(startDateTime).toString(),
+        DateFormat('dd/MM/yyyy').format(endDateTime).toString());
 
     setState(() {
       isLoading = false;
