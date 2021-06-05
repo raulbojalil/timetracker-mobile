@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/services.dart';
 import 'package:timetracker_mobile/const.dart';
 import 'package:timetracker_mobile/timetracker.dart';
 
@@ -9,7 +12,15 @@ import 'package:intl/intl.dart';
 class AddNewEntryWidget extends StatefulWidget {
   final Function onEntryAdded;
 
-  AddNewEntryWidget(this.onEntryAdded);
+  const AddNewEntryWidget(
+    this.payload,
+    this.onEntryAdded, {
+    Key key,
+  }) : super(key: key);
+
+  final String payload;
+
+  static const String routeName = '/addnewentry';
 
   @override
   _AddNewEntryWidgetState createState() =>
@@ -35,6 +46,14 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
         DateFormat('dd/MM/yyyy').format(DateTime.now()).toString();
     hoursController = TextEditingController();
     descriptionController = TextEditingController();
+  }
+
+  void _closeApp() {
+    if (Platform.isAndroid) {
+      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
+    } else {
+      //TODO
+    }
   }
 
   @override
@@ -86,6 +105,8 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
 
                             if (onEntryAdded != null) {
                               onEntryAdded();
+                            } else {
+                              _closeApp();
                             }
                           },
                           icon: Icon(
