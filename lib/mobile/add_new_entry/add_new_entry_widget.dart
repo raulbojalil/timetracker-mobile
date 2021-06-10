@@ -1,8 +1,9 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:timetracker_mobile/const.dart';
-import 'package:timetracker_mobile/timetracker.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:timetracker_mobile/shared/const.dart';
+import 'package:timetracker_mobile/shared/timetracker.dart';
 
 import '../flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
@@ -10,11 +11,8 @@ import 'package:lottie/lottie.dart';
 import 'package:intl/intl.dart';
 
 class AddNewEntryWidget extends StatefulWidget {
-  final Function onEntryAdded;
-
   const AddNewEntryWidget(
-    this.payload,
-    this.onEntryAdded, {
+    this.payload, {
     Key key,
   }) : super(key: key);
 
@@ -23,8 +21,7 @@ class AddNewEntryWidget extends StatefulWidget {
   static const String routeName = '/addnewentry';
 
   @override
-  _AddNewEntryWidgetState createState() =>
-      _AddNewEntryWidgetState(this.onEntryAdded);
+  _AddNewEntryWidgetState createState() => _AddNewEntryWidgetState();
 }
 
 class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
@@ -32,11 +29,10 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
   TextEditingController hoursController;
   TextEditingController descriptionController;
   bool isLoading = false;
+  bool errorOccurred = false;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
-  Function onEntryAdded;
-
-  _AddNewEntryWidgetState(this.onEntryAdded);
+  _AddNewEntryWidgetState();
 
   @override
   void initState() {
@@ -48,16 +44,53 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
     descriptionController = TextEditingController();
   }
 
-  void _closeApp() {
-    if (Platform.isAndroid) {
-      SystemChannels.platform.invokeMethod('SystemNavigator.pop');
-    } else {
-      //TODO
+  Future<bool> addNewEntry() async {
+    setState(() {
+      errorOccurred = false;
+      isLoading = true;
+    });
+
+    try {
+      await TimeTracker.login(Constants.USERNAME, Constants.PASSWORD);
+
+      await TimeTracker.cargaTimeTracker(
+          dateController.text,
+          Constants.PROJECT_ID,
+          hoursController.text,
+          Constants.ASSIGNMENT_TYPE_ID,
+          descriptionController.text,
+          Constants.FOCAL_POINT_ID);
+
+      return true;
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: "An error occurred, please try again later",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      setState(() {
+        errorOccurred = true;
+      });
+      return false;
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final arguments = ModalRoute.of(context).settings.arguments as Map;
+
+    Function callback;
+
+    if (arguments != null) {
+      callback = arguments['callback'];
+    }
+
     return Scaffold(
       key: scaffoldKey,
       body: SafeArea(
@@ -82,31 +115,16 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
                         ),
                         IconButton(
                           onPressed: () async {
-                            setState(() {
-                              isLoading = true;
-                            });
+                            final success = await addNewEntry();
 
-                            await TimeTracker.login(
-                                Constants.USERNAME, Constants.PASSWORD);
-
-                            await TimeTracker.cargaTimeTracker(
-                                dateController.text,
-                                Constants.PROJECT_ID,
-                                hoursController.text,
-                                Constants.ASSIGNMENT_TYPE_ID,
-                                descriptionController.text,
-                                Constants.FOCAL_POINT_ID);
-
-                            setState(() {
-                              isLoading = false;
-                            });
+                            if (!success) {
+                              return;
+                            }
 
                             Navigator.pop(context);
 
-                            if (onEntryAdded != null) {
-                              onEntryAdded();
-                            } else {
-                              _closeApp();
+                            if (callback != null) {
+                              callback();
                             }
                           },
                           icon: Icon(

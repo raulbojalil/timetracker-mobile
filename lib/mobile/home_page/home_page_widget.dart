@@ -1,15 +1,14 @@
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
-import 'package:timetracker_mobile/add_new_entry/add_new_entry_widget.dart';
-import 'package:timetracker_mobile/const.dart';
-import 'package:timetracker_mobile/models/timetrackerentry.dart';
+import 'package:timetracker_mobile/shared/const.dart';
+import 'package:timetracker_mobile/shared/models/timetrackerentry.dart';
+import 'package:timetracker_mobile/shared/notifications.dart';
+import 'package:timetracker_mobile/shared/timetracker.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-
-import '../notifications.dart';
-import '../timetracker.dart';
 
 class HomePageWidget extends StatefulWidget {
   static const String routeName = '/';
@@ -31,11 +30,13 @@ class HomePageWidget extends StatefulWidget {
 class _HomePageWidgetState extends State<HomePageWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
   var isLoading = false;
+  var errorOccurred = false;
   List<TimeTrackerEntry> list = [];
 
   void _loadTimeTrackerTimes() async {
     setState(() {
       isLoading = true;
+      errorOccurred = false;
     });
 
     final now = DateTime.now();
@@ -44,10 +45,23 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         new DateTime(now.year, (now.month + 1 == 13 ? 1 : now.month + 1), 1)
             .subtract(Duration(days: 1));
 
-    await TimeTracker.login(Constants.USERNAME, Constants.PASSWORD);
-    list = await TimeTracker.listaTimeTracker(
-        DateFormat('dd/MM/yyyy').format(startDateTime).toString(),
-        DateFormat('dd/MM/yyyy').format(endDateTime).toString());
+    try {
+      await TimeTracker.login(Constants.USERNAME, Constants.PASSWORD);
+      list = await TimeTracker.listaTimeTracker(
+          DateFormat('dd/MM/yyyy').format(startDateTime).toString(),
+          DateFormat('dd/MM/yyyy').format(endDateTime).toString());
+    } catch (e) {
+      Fluttertoast.showToast(
+          msg: "An error occurred, please try again later",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          backgroundColor: Colors.red,
+          textColor: Colors.white,
+          fontSize: 16.0);
+      setState(() {
+        errorOccurred = true;
+      });
+    }
 
     setState(() {
       isLoading = false;
@@ -120,9 +134,17 @@ class _HomePageWidgetState extends State<HomePageWidget> {
         .listen((ReceivedNotification receivedNotification) async {});
   }
 
+  void loadNewEntryPage() async {
+    await Navigator.pushNamed(context, '/addnewentry', arguments: {
+      'callback': () {
+        _loadTimeTrackerTimes();
+      }
+    });
+  }
+
   void _configureSelectNotificationSubject() {
     selectNotificationSubject.stream.listen((String payload) async {
-      await Navigator.pushNamed(context, '/addnewentry');
+      loadNewEntryPage();
     });
   }
 
@@ -142,15 +164,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       key: scaffoldKey,
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-          this._showNotification();
-          // await Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //     builder: (context) => AddNewEntryWidget("", () {
-          //       _loadTimeTrackerTimes();
-          //     }),
-          //   ),
-          // );
+          loadNewEntryPage();
         },
         backgroundColor: FlutterFlowTheme.primaryColor,
         elevation: 8,
@@ -209,35 +223,39 @@ class _HomePageWidgetState extends State<HomePageWidget> {
             ),
             isLoading
                 ? Center(child: Text("Loading..."))
-                : Expanded(
-                    child: list.length == 0
-                        ? Text("No data")
-                        : ListView.separated(
-                            itemCount: list.length,
-                            padding: EdgeInsets.zero,
-                            scrollDirection: Axis.vertical,
-                            separatorBuilder:
-                                (BuildContext context, int index) => Divider(),
-                            itemBuilder: (BuildContext context, int index) {
-                              final item = list[index];
-                              return ListTile(
-                                title: Text(
-                                  item.description,
-                                  style: FlutterFlowTheme.title3.override(
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  "${item.hours} hour(s) on ${item.date}",
-                                  style: FlutterFlowTheme.subtitle2.override(
-                                    fontFamily: 'Poppins',
-                                  ),
-                                ),
-                                tileColor: Color(0xFFF5F5F5),
-                                dense: false,
-                              );
-                            }),
-                  )
+                : (errorOccurred
+                    ? Text("Error")
+                    : Expanded(
+                        child: list.length == 0
+                            ? Text("No data")
+                            : ListView.separated(
+                                itemCount: list.length,
+                                padding: EdgeInsets.zero,
+                                scrollDirection: Axis.vertical,
+                                separatorBuilder:
+                                    (BuildContext context, int index) =>
+                                        Divider(),
+                                itemBuilder: (BuildContext context, int index) {
+                                  final item = list[index];
+                                  return ListTile(
+                                    title: Text(
+                                      item.description,
+                                      style: FlutterFlowTheme.title3.override(
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      "${item.hours} hour(s) on ${item.date}",
+                                      style:
+                                          FlutterFlowTheme.subtitle2.override(
+                                        fontFamily: 'Poppins',
+                                      ),
+                                    ),
+                                    tileColor: Color(0xFFF5F5F5),
+                                    dense: false,
+                                  );
+                                }),
+                      ))
           ],
         ),
       ),
