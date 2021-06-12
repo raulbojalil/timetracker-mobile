@@ -192,7 +192,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                   Padding(
                     padding: EdgeInsets.fromLTRB(20, 0, 0, 0),
                     child: Image.asset(
-                      'assets/images/logo.png',
+                      'assets/images/logo_white.png',
                       fit: BoxFit.fitWidth,
                     ),
                   ),
