@@ -4,6 +4,7 @@ import 'package:timetracker_mobile/shared/const.dart';
 import 'package:timetracker_mobile/shared/models/timetrackerentry.dart';
 import 'package:timetracker_mobile/shared/timetracker.dart';
 
+//TODO: Move this to shared and use it in the mobile version too
 class TimeTrackerStore with ChangeNotifier {
   List<TimeTrackerEntry> _list = [];
   bool _loading = false;

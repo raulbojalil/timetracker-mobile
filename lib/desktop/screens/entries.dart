@@ -35,7 +35,8 @@ class Entries extends StatelessWidget {
                 DateFormat('dd/MM/yyyy').format(DateTime.now()).toString();
             showDialog(
               context: context,
-              builder: (context) {
+              builder: (dialogContext) {
+                final ttDialogStore = dialogContext.watch<TimeTrackerStore>();
                 return ContentDialog(
                   backgroundDismiss: true,
                   title: Text('Add new entry'),
@@ -59,31 +60,35 @@ class Entries extends StatelessWidget {
                         controller: descriptionController,
                         header: 'Description',
                         placeholder: '',
-                        minHeight: 150,
+                        minHeight: 100,
                       ),
                     ],
                   ),
                   actions: [
-                    Button(
-                      onPressed: () async {
-                        final success = await ttStore.addEntry(
-                            dateController.text,
-                            hoursController.text,
-                            descriptionController.text);
+                    ttDialogStore.saving
+                        ? Button(child: Text("Saving..."), onPressed: null)
+                        : Button(
+                            onPressed: () async {
+                              final success = await ttStore.addEntry(
+                                  dateController.text,
+                                  hoursController.text,
+                                  descriptionController.text);
 
-                        if (success) {
-                          Navigator.pop(context);
-                          ttStore.loadTimeTrackerTimes();
-                        }
-                      },
-                      child: Text(ttStore.saving ? "Saving..." : "OK"),
-                    ),
-                    Button(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Text("Cancel"),
-                    )
+                              if (success) {
+                                Navigator.pop(context);
+                                ttStore.loadTimeTrackerTimes();
+                              }
+                            },
+                            child: Text("OK"),
+                          ),
+                    ttDialogStore.saving
+                        ? Button(child: Text("Cancel"), onPressed: null)
+                        : Button(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text("Cancel"),
+                          )
                   ],
                 );
               },
@@ -106,6 +111,10 @@ class Entries extends StatelessWidget {
                 Wrap(children: [
                   for (var item in ttStore.list)
                     TappableListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Color.fromARGB(255, 0x02, 0x72, 0xB1),
+                        child: Text(item.date.split("/").elementAt(0)),
+                      ),
                       title: Text(shortenDescription(item.description)),
                       subtitle: Text("${item.hours} hour(s) on ${item.date}"),
                       onTap: () {
@@ -182,10 +191,5 @@ class Entries extends StatelessWidget {
               ],
             ),
     );
-    // return Text(
-
-    //     /// Calls `context.watch` to make [Count] rebuild when [Counter] changes.
-    //     '${context.watch<Counter>().list}',
-    //     key: const Key('counterState'));
   }
 }
