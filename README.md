@@ -20,11 +20,11 @@ Run on your favorite platform! (not working on Flutter Web due to CORS)
 
 ## Screens
 
-# Windows
+### Windows
 
 ![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/windowsapp.gif?raw=true "timetrackerwin")
 
-# Android
+### Android
 
 ![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/image_1.png?raw=true "timetracker1")
 ![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/image_2.png?raw=true "timetracker2")
