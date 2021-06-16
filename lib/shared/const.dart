@@ -1,5 +1,5 @@
 //Fill all the required fields here
-//TODO: Make this configurable within the app
+//TODO: Make this configurable within the mobile app
 
 class Constants {
   static const USERNAME = '';

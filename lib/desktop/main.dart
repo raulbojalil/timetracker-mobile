@@ -1,16 +1,21 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timetracker_mobile/desktop/settings_store.dart';
 import 'package:timetracker_mobile/desktop/theme.dart';
 import 'package:timetracker_mobile/desktop/timetracker_store.dart';
 
 import 'screens/home.dart';
 
-runDesktopApp() {
+runDesktopApp() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => TimeTrackerStore()),
-      ChangeNotifierProvider(create: (_) => AppTheme()),
+      ChangeNotifierProvider(create: (_) => TimeTrackerStore(prefs)),
+      ChangeNotifierProvider(create: (_) => AppTheme(prefs)),
+      ChangeNotifierProvider(create: (_) => SettingsStore(prefs)),
     ],
     child: const MyApp(),
   ));

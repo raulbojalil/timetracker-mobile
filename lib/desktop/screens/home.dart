@@ -1,6 +1,8 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:timetracker_mobile/desktop/screens/web.dart';
+import 'package:timetracker_mobile/desktop/timetracker_store.dart';
 import 'entries.dart';
 import 'settings.dart';
 import '../theme.dart';
@@ -30,11 +32,17 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
+    final ttStore = context.watch<TimeTrackerStore>();
     return NavigationView(
       useAcrylic: false,
       pane: NavigationPane(
         selected: index,
-        onChanged: (i) => setState(() => index = i),
+        onChanged: (i) {
+          if (i == 0) {
+            ttStore.loadTimeTrackerEntries();
+          }
+          setState(() => index = i);
+        },
         header: Container(
             height: kOneLineTileHeight,
             padding: const EdgeInsets.symmetric(horizontal: 10.0),
@@ -88,6 +96,7 @@ class _HomeState extends State<Home> {
         },
         items: [
           PaneItem(icon: Icon(Icons.input), title: Text('List of Entries')),
+          PaneItem(icon: Icon(Icons.web_rounded), title: Text('Web version')),
         ],
         footerItems: [
           PaneItemSeparator(),
@@ -96,6 +105,7 @@ class _HomeState extends State<Home> {
       ),
       content: NavigationBody(index: index, children: [
         Entries(),
+        Web(),
         Settings(controller: settingsController),
       ]),
     );

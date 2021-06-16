@@ -76,7 +76,7 @@ class Entries extends StatelessWidget {
 
                               if (success) {
                                 Navigator.pop(context);
-                                ttStore.loadTimeTrackerTimes();
+                                ttStore.loadTimeTrackerEntries();
                               }
                             },
                             child: Text("OK"),
@@ -100,96 +100,117 @@ class Entries extends StatelessWidget {
           ? Center(
               child: Text("Loading..."),
             )
-          : ListView(
-              padding: EdgeInsets.only(
-                bottom: kPageDefaultVerticalPadding,
-                left: PageHeader.horizontalPadding(context),
-                right: PageHeader.horizontalPadding(context),
-              ),
-              controller: scrollController,
-              children: [
-                Wrap(children: [
-                  for (var item in ttStore.list)
-                    TappableListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: Color.fromARGB(255, 0x02, 0x72, 0xB1),
-                        child: Text(item.date.split("/").elementAt(0)),
-                      ),
-                      title: Text(shortenDescription(item.description)),
-                      subtitle: Text("${item.hours} hour(s) on ${item.date}"),
-                      onTap: () {
-                        showDialog(
-                          context: context,
-                          builder: (context) {
-                            return ContentDialog(
-                              title: Text('Entry details'),
-                              content: Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(item.description),
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                                    child: Row(
-                                      children: [
-                                        Text("Project: ",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold)),
-                                        Text(item.project),
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                                    child: Row(
-                                      children: [
-                                        Text("Assignment Type: ",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold)),
-                                        Text(item.assignmentType),
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                                    child: Row(
-                                      children: [
-                                        Text("Date: ",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold)),
-                                        Text(item.date),
-                                      ],
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
-                                    child: Row(
-                                      children: [
-                                        Text("Hours: ",
-                                            style: TextStyle(
-                                                fontWeight: FontWeight.bold)),
-                                        Text(item.hours),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+          : (ttStore.missingData
+              ? Center(
+                  child: Text(
+                      "Please go to the Settings page to fill in the missing data required to fetch the time tracker entries"),
+                )
+              : ListView(
+                  padding: EdgeInsets.only(
+                    bottom: kPageDefaultVerticalPadding,
+                    left: PageHeader.horizontalPadding(context),
+                    right: PageHeader.horizontalPadding(context),
+                  ),
+                  controller: scrollController,
+                  children: [
+                    ttStore.list.length == 0
+                        ? TappableListTile(title: Text("No items found"))
+                        : Wrap(children: [
+                            for (var item in ttStore.list)
+                              TappableListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor:
+                                      Color.fromARGB(255, 0x02, 0x72, 0xB1),
+                                  child:
+                                      Text(item.date.split("/").elementAt(0)),
+                                ),
+                                title:
+                                    Text(shortenDescription(item.description)),
+                                subtitle: Text(
+                                    "${item.hours} hour(s) on ${item.date}"),
+                                onTap: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return ContentDialog(
+                                        title: Text('Entry details'),
+                                        content: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(item.description),
+                                            Padding(
+                                              padding: EdgeInsets.fromLTRB(
+                                                  0, 10, 0, 0),
+                                              child: Row(
+                                                children: [
+                                                  Text("Project: ",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                  Text(item.project),
+                                                ],
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: EdgeInsets.fromLTRB(
+                                                  0, 10, 0, 0),
+                                              child: Row(
+                                                children: [
+                                                  Text("Assignment Type: ",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                  Text(item.assignmentType),
+                                                ],
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: EdgeInsets.fromLTRB(
+                                                  0, 10, 0, 0),
+                                              child: Row(
+                                                children: [
+                                                  Text("Date: ",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                  Text(item.date),
+                                                ],
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding: EdgeInsets.fromLTRB(
+                                                  0, 10, 0, 0),
+                                              child: Row(
+                                                children: [
+                                                  Text("Hours: ",
+                                                      style: TextStyle(
+                                                          fontWeight:
+                                                              FontWeight.bold)),
+                                                  Text(item.hours),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        actions: [
+                                          Button(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text("Close"),
+                                          )
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
                               ),
-                              actions: [
-                                Button(
-                                  onPressed: () {
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Close"),
-                                )
-                              ],
-                            );
-                          },
-                        );
-                      },
-                    ),
-                ]),
-              ],
-            ),
+                          ]),
+                  ],
+                )),
     );
   }
 }

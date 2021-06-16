@@ -1,5 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timetracker_mobile/desktop/settings_store.dart';
 import 'package:timetracker_mobile/shared/const.dart';
 import 'package:timetracker_mobile/shared/models/timetrackerentry.dart';
 import 'package:timetracker_mobile/shared/timetracker.dart';
@@ -9,23 +11,33 @@ class TimeTrackerStore with ChangeNotifier {
   List<TimeTrackerEntry> _list = [];
   bool _loading = false;
   bool _saving = false;
+  bool _missingData = false;
 
   List<TimeTrackerEntry> get list => _list;
   bool get loading => _loading;
   bool get saving => _saving;
+  bool get missingData => _missingData;
 
-  TimeTrackerStore() {
-    loadTimeTrackerTimes();
+  SharedPreferences prefs;
+
+  TimeTrackerStore(this.prefs) {
+    loadTimeTrackerEntries();
   }
 
   Future<bool> addEntry(String date, String hours, String description) async {
     _saving = true;
     notifyListeners();
     try {
-      await TimeTracker.login(Constants.USERNAME, Constants.PASSWORD);
+      await TimeTracker.login(this.prefs.getString(SettingTypes.USERNAME),
+          this.prefs.getString(SettingTypes.PASSWORD));
 
-      await TimeTracker.cargaTimeTracker(date, Constants.PROJECT_ID, hours,
-          Constants.ASSIGNMENT_TYPE_ID, description, Constants.FOCAL_POINT_ID);
+      await TimeTracker.cargaTimeTracker(
+          date,
+          this.prefs.getString(SettingTypes.PROJECT_ID),
+          hours,
+          this.prefs.getString(SettingTypes.ASSIGNMENT_TYPE_ID),
+          description,
+          this.prefs.getString(SettingTypes.FOCAL_POINT_ID));
 
       return true;
     } catch (e) {
@@ -36,7 +48,25 @@ class TimeTrackerStore with ChangeNotifier {
     }
   }
 
-  void loadTimeTrackerTimes() async {
+  bool verifyData() {
+    return (this.prefs.getString(SettingTypes.PROJECT_ID)?.isNotEmpty ??
+            false) &&
+        (this.prefs.getString(SettingTypes.ASSIGNMENT_TYPE_ID)?.isNotEmpty ??
+            false) &&
+        (this.prefs.getString(SettingTypes.FOCAL_POINT_ID)?.isNotEmpty ??
+            false) &&
+        (this.prefs.getString(SettingTypes.USERNAME)?.isNotEmpty ?? false) &&
+        (this.prefs.getString(SettingTypes.PASSWORD)?.isNotEmpty ?? false);
+  }
+
+  void loadTimeTrackerEntries() async {
+    if (!verifyData()) {
+      _missingData = true;
+      notifyListeners();
+      return;
+    }
+
+    _missingData = false;
     _loading = true;
     notifyListeners();
 
@@ -48,7 +78,8 @@ class TimeTrackerStore with ChangeNotifier {
             .subtract(Duration(days: 1));
 
     try {
-      await TimeTracker.login(Constants.USERNAME, Constants.PASSWORD);
+      await TimeTracker.login(this.prefs.getString(SettingTypes.USERNAME),
+          this.prefs.getString(SettingTypes.PASSWORD));
       var list = await TimeTracker.listaTimeTracker(
           DateFormat('dd/MM/yyyy').format(startDateTime).toString(),
           DateFormat('dd/MM/yyyy').format(endDateTime).toString());

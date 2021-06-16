@@ -1,6 +1,7 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
+import 'package:timetracker_mobile/desktop/settings_store.dart';
 import 'package:timetracker_mobile/desktop/theme.dart';
 
 const List<String> accentColorNames = [
@@ -16,13 +17,31 @@ const List<String> accentColorNames = [
 ];
 
 class Settings extends StatelessWidget {
-  const Settings({Key key, this.controller}) : super(key: key);
+  Settings({Key key, this.controller}) : super(key: key);
 
   final ScrollController controller;
+
+  final TextEditingController assignmentTypeIdController =
+      new TextEditingController();
+  final TextEditingController projectIdController = new TextEditingController();
+  final TextEditingController focalPointIdController =
+      new TextEditingController();
+  final TextEditingController usernameController = new TextEditingController();
+  final TextEditingController passwordController = new TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
+    final settings = context.watch<SettingsStore>();
+
+    assignmentTypeIdController.text =
+        settings.loadSetting(SettingTypes.ASSIGNMENT_TYPE_ID);
+    projectIdController.text = settings.loadSetting(SettingTypes.PROJECT_ID);
+    focalPointIdController.text =
+        settings.loadSetting(SettingTypes.FOCAL_POINT_ID);
+    usernameController.text = settings.loadSetting(SettingTypes.USERNAME);
+    passwordController.text = settings.loadSetting(SettingTypes.PASSWORD);
+
     final tooltipThemeData = TooltipThemeData(decoration: () {
       final radius = BorderRadius.zero;
       final shadow = [
@@ -59,6 +78,48 @@ class Settings extends StatelessWidget {
         ),
         controller: controller,
         children: [
+          Text('Secrets', style: FluentTheme.of(context).typography.subtitle),
+          TextBox(
+              onChanged: (value) {
+                settings.saveSetting(SettingTypes.USERNAME, value);
+              },
+              controller: usernameController,
+              header: "Username"),
+          TextBox(
+            onChanged: (value) {
+              settings.saveSetting(SettingTypes.PASSWORD, value);
+            },
+            keyboardType: TextInputType.visiblePassword,
+            controller: passwordController,
+            header: "Password",
+          ),
+          TextBox(
+            onChanged: (value) {
+              settings.saveSetting(SettingTypes.ASSIGNMENT_TYPE_ID, value);
+            },
+            controller: assignmentTypeIdController,
+            header: "Assignment Type ID",
+            placeholder:
+                "To get this value, go to the TT web site and inspect the 'Assignment type' <select/>. Then, get the value of the desired <option/>.",
+          ),
+          TextBox(
+            header: "Project ID",
+            controller: projectIdController,
+            onChanged: (value) {
+              settings.saveSetting(SettingTypes.PROJECT_ID, value);
+            },
+            placeholder:
+                "To get this value, go to the TT web site and inspect the 'Project' <select/>. Then, get the value of the desired <option/>.",
+          ),
+          TextBox(
+            header: "Focal Point ID",
+            controller: focalPointIdController,
+            onChanged: (value) {
+              settings.saveSetting(SettingTypes.FOCAL_POINT_ID, value);
+            },
+            placeholder:
+                "To get this value, go to the TT web site and inspect the 'Client Focal Point' <select/>. Then, get the value of the desired <option/>.",
+          ),
           Text('Theme mode',
               style: FluentTheme.of(context).typography.subtitle),
           ...List.generate(ThemeMode.values.length, (index) {
