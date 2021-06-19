@@ -1,8 +1,9 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
-import 'package:timetracker_mobile/desktop/settings_store.dart';
 import 'package:timetracker_mobile/desktop/theme.dart';
+import 'package:timetracker_mobile/shared/providers/settings_provider.dart';
+import 'package:timetracker_mobile/shared/setting_types.dart';
 
 const List<String> accentColorNames = [
   'System',
@@ -32,7 +33,7 @@ class Settings extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
-    final settings = context.watch<SettingsStore>();
+    final settings = context.watch<SettingsProvider>();
 
     assignmentTypeIdController.text =
         settings.loadSetting(SettingTypes.ASSIGNMENT_TYPE_ID);

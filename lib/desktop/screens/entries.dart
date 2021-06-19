@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import 'package:timetracker_mobile/desktop/timetracker_store.dart';
+import 'package:timetracker_mobile/shared/providers/timetracker_provider.dart';
 
 class Entries extends StatelessWidget {
   const Entries({Key key}) : super(key: key);
@@ -21,7 +21,7 @@ class Entries extends StatelessWidget {
     final hoursController = TextEditingController();
     final descriptionController = TextEditingController();
 
-    final ttStore = context.watch<TimeTrackerStore>();
+    final timeTracker = context.watch<TimeTrackerProvider>();
 
     return ScaffoldPage(
       header: PageHeader(
@@ -36,7 +36,8 @@ class Entries extends StatelessWidget {
             showDialog(
               context: context,
               builder: (dialogContext) {
-                final ttDialogStore = dialogContext.watch<TimeTrackerStore>();
+                final ttDialogStore =
+                    dialogContext.watch<TimeTrackerProvider>();
                 return ContentDialog(
                   backgroundDismiss: true,
                   title: Text('Add new entry'),
@@ -69,14 +70,14 @@ class Entries extends StatelessWidget {
                         ? Button(child: Text("Saving..."), onPressed: null)
                         : Button(
                             onPressed: () async {
-                              final success = await ttStore.addEntry(
+                              final success = await timeTracker.addEntry(
                                   dateController.text,
                                   hoursController.text,
                                   descriptionController.text);
 
                               if (success) {
                                 Navigator.pop(context);
-                                ttStore.loadTimeTrackerEntries();
+                                timeTracker.loadTimeTrackerEntries();
                               }
                             },
                             child: Text("OK"),
@@ -96,11 +97,11 @@ class Entries extends StatelessWidget {
           },
         ),
       ])),
-      content: ttStore.loading
+      content: timeTracker.loading
           ? Center(
               child: Text("Loading..."),
             )
-          : (ttStore.missingData
+          : (timeTracker.missingData
               ? Center(
                   child: Text(
                       "Please go to the Settings page to fill in the missing data required to fetch the time tracker entries"),
@@ -113,10 +114,10 @@ class Entries extends StatelessWidget {
                   ),
                   controller: scrollController,
                   children: [
-                    ttStore.list.length == 0
+                    timeTracker.list.length == 0
                         ? TappableListTile(title: Text("No items found"))
                         : Wrap(children: [
-                            for (var item in ttStore.list)
+                            for (var item in timeTracker.list)
                               TappableListTile(
                                 leading: CircleAvatar(
                                   backgroundColor:

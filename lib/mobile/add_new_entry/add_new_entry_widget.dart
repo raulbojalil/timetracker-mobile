@@ -1,14 +1,12 @@
 import 'dart:io';
 
 import 'package:flutter/services.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:timetracker_mobile/shared/const.dart';
-import 'package:timetracker_mobile/shared/timetracker.dart';
-
+import 'package:timetracker_mobile/shared/providers/timetracker_provider.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 class AddNewEntryWidget extends StatefulWidget {
   const AddNewEntryWidget(
@@ -28,8 +26,7 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
   TextEditingController dateController;
   TextEditingController hoursController;
   TextEditingController descriptionController;
-  bool isLoading = false;
-  bool errorOccurred = false;
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   _AddNewEntryWidgetState();
@@ -44,59 +41,15 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
     descriptionController = TextEditingController();
   }
 
-  Future<bool> addNewEntry() async {
-    setState(() {
-      errorOccurred = false;
-      isLoading = true;
-    });
-
-    try {
-      await TimeTracker.login(Constants.USERNAME, Constants.PASSWORD);
-
-      await TimeTracker.cargaTimeTracker(
-          dateController.text,
-          Constants.PROJECT_ID,
-          hoursController.text,
-          Constants.ASSIGNMENT_TYPE_ID,
-          descriptionController.text,
-          Constants.FOCAL_POINT_ID);
-
-      return true;
-    } catch (e) {
-      Fluttertoast.showToast(
-          msg: "An error occurred, please try again later",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
-      setState(() {
-        errorOccurred = true;
-      });
-      return false;
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    final arguments = ModalRoute.of(context).settings.arguments as Map;
-
-    Function callback;
-
-    if (arguments != null) {
-      callback = arguments['callback'];
-    }
+    final timeTracker = context.watch<TimeTrackerProvider>();
 
     return Scaffold(
       key: scaffoldKey,
       body: SafeArea(
-        child: isLoading
-            ? Center(
-                child: Lottie.asset('assets/lottie/9965-loading-spinner.json'))
+        child: timeTracker.saving
+            ? Center(child: Text("Saving, please wait..."))
             : Padding(
                 padding: EdgeInsets.fromLTRB(10, 0, 10, 1),
                 child: Column(
@@ -115,17 +68,17 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
                         ),
                         IconButton(
                           onPressed: () async {
-                            final success = await addNewEntry();
+                            final success = await timeTracker.addEntry(
+                                dateController.text,
+                                hoursController.text,
+                                descriptionController.text);
 
                             if (!success) {
                               return;
                             }
 
+                            timeTracker.loadTimeTrackerEntries();
                             Navigator.pop(context);
-
-                            if (callback != null) {
-                              callback();
-                            }
                           },
                           icon: Icon(
                             Icons.check,

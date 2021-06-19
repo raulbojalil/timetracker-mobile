@@ -1,13 +1,12 @@
 import 'package:fluent_ui/fluent_ui.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timetracker_mobile/desktop/settings_store.dart';
-import 'package:timetracker_mobile/shared/const.dart';
 import 'package:timetracker_mobile/shared/models/timetrackerentry.dart';
+import 'package:timetracker_mobile/shared/setting_types.dart';
 import 'package:timetracker_mobile/shared/timetracker.dart';
 
 //TODO: Move this to shared and use it in the mobile version too
-class TimeTrackerStore with ChangeNotifier {
+class TimeTrackerProvider with ChangeNotifier {
   List<TimeTrackerEntry> _list = [];
   bool _loading = false;
   bool _saving = false;
@@ -20,7 +19,7 @@ class TimeTrackerStore with ChangeNotifier {
 
   SharedPreferences prefs;
 
-  TimeTrackerStore(this.prefs) {
+  TimeTrackerProvider(this.prefs) {
     loadTimeTrackerEntries();
   }
 

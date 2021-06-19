@@ -4,29 +4,18 @@
 
 ## Usage
 
-Fill the timetracker-mobile/lib/const.dart file with your credentials and IDs (you can get these by inspecting the TT site)
-
-```dart
-class Constants {
-  static const USERNAME = '';
-  static const PASSWORD = '';
-  static const ASSIGNMENT_TYPE_ID = '';
-  static const FOCAL_POINT_ID = '';
-  static const PROJECT_ID = '';
-}
-```
-
 Run on your favorite platform! (not working on Flutter Web due to CORS)
+After running the application for the first time, you will have to fill in all the required data. You can find this information by inspecting the TT site.
 
 ## Screens
-
-### Windows
-
-![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/windowsapp.gif?raw=true "timetrackerwin")
 
 ### Android
 
 ![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/image_1.png?raw=true "timetracker1")
 ![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/image_2.png?raw=true "timetracker2")
+
+### Windows
+
+![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/windowsapp.gif?raw=true "timetrackerwin")
 
 

@@ -1,14 +1,11 @@
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:intl/intl.dart';
-import 'package:timetracker_mobile/shared/const.dart';
-import 'package:timetracker_mobile/shared/models/timetrackerentry.dart';
 import 'package:timetracker_mobile/shared/notifications.dart';
-import 'package:timetracker_mobile/shared/timetracker.dart';
+import 'package:timetracker_mobile/shared/providers/timetracker_provider.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
+import 'package:provider/provider.dart';
 
 class HomePageWidget extends StatefulWidget {
   static const String routeName = '/';
@@ -29,58 +26,20 @@ class HomePageWidget extends StatefulWidget {
 
 class _HomePageWidgetState extends State<HomePageWidget> {
   final scaffoldKey = GlobalKey<ScaffoldState>();
-  var isLoading = false;
-  var errorOccurred = false;
-  List<TimeTrackerEntry> list = [];
 
-  void _loadTimeTrackerTimes() async {
-    setState(() {
-      isLoading = true;
-      errorOccurred = false;
-    });
-
-    final now = DateTime.now();
-    final startDateTime = new DateTime(now.year, now.month, 1);
-    final endDateTime =
-        new DateTime(now.year, (now.month + 1 == 13 ? 1 : now.month + 1), 1)
-            .subtract(Duration(days: 1));
-
-    try {
-      await TimeTracker.login(Constants.USERNAME, Constants.PASSWORD);
-      list = await TimeTracker.listaTimeTracker(
-          DateFormat('dd/MM/yyyy').format(startDateTime).toString(),
-          DateFormat('dd/MM/yyyy').format(endDateTime).toString());
-    } catch (e) {
-      Fluttertoast.showToast(
-          msg: "An error occurred, please try again later",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.BOTTOM,
-          backgroundColor: Colors.red,
-          textColor: Colors.white,
-          fontSize: 16.0);
-      setState(() {
-        errorOccurred = true;
-      });
-    }
-
-    setState(() {
-      isLoading = false;
-    });
-  }
-
-  Future<void> _showNotification() async {
-    const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-            'your channel id', 'your channel name', 'your channel description',
-            importance: Importance.max,
-            priority: Priority.high,
-            ticker: 'ticker');
-    const NotificationDetails platformChannelSpecifics =
-        NotificationDetails(android: androidPlatformChannelSpecifics);
-    await flutterLocalNotificationsPlugin.show(
-        0, 'plain title', 'plain body', platformChannelSpecifics,
-        payload: 'item x');
-  }
+  // Future<void> _showNotification() async {
+  //   const AndroidNotificationDetails androidPlatformChannelSpecifics =
+  //       AndroidNotificationDetails(
+  //           'your channel id', 'your channel name', 'your channel description',
+  //           importance: Importance.max,
+  //           priority: Priority.high,
+  //           ticker: 'ticker');
+  //   const NotificationDetails platformChannelSpecifics =
+  //       NotificationDetails(android: androidPlatformChannelSpecifics);
+  //   await flutterLocalNotificationsPlugin.show(
+  //       0, 'plain title', 'plain body', platformChannelSpecifics,
+  //       payload: 'item x');
+  // }
 
   Future<void> _scheduleDailyFivePMNotification() async {
     await flutterLocalNotificationsPlugin.zonedSchedule(
@@ -135,11 +94,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   }
 
   void loadNewEntryPage() async {
-    await Navigator.pushNamed(context, '/addnewentry', arguments: {
-      'callback': () {
-        _loadTimeTrackerTimes();
-      }
-    });
+    await Navigator.pushNamed(context, '/addnewentry');
+  }
+
+  void loadSettingsPage() async {
+    await Navigator.pushNamed(context, '/settings');
   }
 
   void _configureSelectNotificationSubject() {
@@ -155,11 +114,11 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     _configureDidReceiveLocalNotificationSubject();
     _configureSelectNotificationSubject();
     _scheduleDailyFivePMNotification();
-    _loadTimeTrackerTimes();
   }
 
   @override
   Widget build(BuildContext context) {
+    final timeTracker = context.watch<TimeTrackerProvider>();
     return Scaffold(
       key: scaffoldKey,
       floatingActionButton: FloatingActionButton(
@@ -217,26 +176,43 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         ),
                       ),
                     ),
+                  ),
+                  PopupMenuButton<String>(
+                    icon: Icon(Icons.menu, color: Color(0xFFFAFAFA)),
+                    onSelected: (value) {
+                      loadSettingsPage();
+                    },
+                    itemBuilder: (BuildContext context) {
+                      return {'Settings'}.map((String choice) {
+                        return PopupMenuItem<String>(
+                          value: choice,
+                          child: Text(choice),
+                        );
+                      }).toList();
+                    },
                   )
                 ],
               ),
             ),
-            isLoading
-                ? Center(child: Text("Loading..."))
-                : (errorOccurred
-                    ? Text("Error")
+            timeTracker.loading
+                ? Expanded(child: Center(child: Text("Loading...")))
+                : (timeTracker.missingData
+                    ? Expanded(
+                        child: Center(
+                            child: Text(
+                                "Go to the Settings page (top right) to configure your secrets")))
                     : Expanded(
-                        child: list.length == 0
-                            ? Text("No data")
+                        child: timeTracker.list.length == 0
+                            ? Center(child: Text("No data"))
                             : ListView.separated(
-                                itemCount: list.length,
+                                itemCount: timeTracker.list.length,
                                 padding: EdgeInsets.zero,
                                 scrollDirection: Axis.vertical,
                                 separatorBuilder:
                                     (BuildContext context, int index) =>
                                         Divider(),
                                 itemBuilder: (BuildContext context, int index) {
-                                  final item = list[index];
+                                  final item = timeTracker.list[index];
                                   return ListTile(
                                     title: Text(
                                       item.description,

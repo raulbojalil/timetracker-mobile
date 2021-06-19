@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:timetracker_mobile/mobile/settings/settings_widget.dart';
+import 'package:timetracker_mobile/shared/providers/settings_provider.dart';
+import 'package:timetracker_mobile/shared/providers/timetracker_provider.dart';
 import 'add_new_entry/add_new_entry_widget.dart';
 import 'home_page/home_page_widget.dart';
 import 'package:timetracker_mobile/shared/notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
-import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 
 String initialRoute = HomePageWidget.routeName;
 
@@ -17,6 +21,7 @@ Future<void> _configureLocalTimeZone() async {
 }
 
 void runMobileApp() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
   await _configureLocalTimeZone();
 
   final NotificationAppLaunchDetails notificationAppLaunchDetails =
@@ -58,15 +63,22 @@ void runMobileApp() async {
     selectNotificationSubject.add(payload);
   });
 
-  runApp(MaterialApp(
-    title: 'BairesDev TimeTracker',
-    theme: ThemeData(primarySwatch: Colors.blue),
-    initialRoute: initialRoute,
-    routes: <String, WidgetBuilder>{
-      HomePageWidget.routeName: (_) =>
-          HomePageWidget(notificationAppLaunchDetails),
-      AddNewEntryWidget.routeName: (_) =>
-          AddNewEntryWidget(selectedNotificationPayload)
-    },
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (_) => TimeTrackerProvider(prefs)),
+      ChangeNotifierProvider(create: (_) => SettingsProvider(prefs)),
+    ],
+    child: MaterialApp(
+      title: 'BairesDev TimeTracker',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      initialRoute: initialRoute,
+      routes: <String, WidgetBuilder>{
+        HomePageWidget.routeName: (_) =>
+            HomePageWidget(notificationAppLaunchDetails),
+        AddNewEntryWidget.routeName: (_) =>
+            AddNewEntryWidget(selectedNotificationPayload),
+        SettingsWidget.routeName: (_) => SettingsWidget()
+      },
+    ),
   ));
 }

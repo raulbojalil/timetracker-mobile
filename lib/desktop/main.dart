@@ -2,9 +2,9 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timetracker_mobile/desktop/settings_store.dart';
 import 'package:timetracker_mobile/desktop/theme.dart';
-import 'package:timetracker_mobile/desktop/timetracker_store.dart';
+import 'package:timetracker_mobile/shared/providers/settings_provider.dart';
+import 'package:timetracker_mobile/shared/providers/timetracker_provider.dart';
 
 import 'screens/home.dart';
 
@@ -13,9 +13,9 @@ runDesktopApp() async {
 
   runApp(MultiProvider(
     providers: [
-      ChangeNotifierProvider(create: (_) => TimeTrackerStore(prefs)),
+      ChangeNotifierProvider(create: (_) => TimeTrackerProvider(prefs)),
       ChangeNotifierProvider(create: (_) => AppTheme(prefs)),
-      ChangeNotifierProvider(create: (_) => SettingsStore(prefs)),
+      ChangeNotifierProvider(create: (_) => SettingsProvider(prefs)),
     ],
     child: const MyApp(),
   ));

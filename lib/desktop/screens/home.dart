@@ -2,7 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:timetracker_mobile/desktop/screens/web.dart';
-import 'package:timetracker_mobile/desktop/timetracker_store.dart';
+import 'package:timetracker_mobile/shared/providers/timetracker_provider.dart';
 import 'entries.dart';
 import 'settings.dart';
 import '../theme.dart';
@@ -32,14 +32,14 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     final appTheme = context.watch<AppTheme>();
-    final ttStore = context.watch<TimeTrackerStore>();
+    final timeTracker = context.watch<TimeTrackerProvider>();
     return NavigationView(
       useAcrylic: false,
       pane: NavigationPane(
         selected: index,
         onChanged: (i) {
           if (i == 0) {
-            ttStore.loadTimeTrackerEntries();
+            timeTracker.loadTimeTrackerEntries();
           }
           setState(() => index = i);
         },
