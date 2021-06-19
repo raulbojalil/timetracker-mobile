@@ -210,7 +210,9 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                                 scrollDirection: Axis.vertical,
                                 separatorBuilder:
                                     (BuildContext context, int index) =>
-                                        Divider(),
+                                        Divider(
+                                          height: 0,
+                                        ),
                                 itemBuilder: (BuildContext context, int index) {
                                   final item = timeTracker.list[index];
                                   return ListTile(

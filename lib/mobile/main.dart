@@ -70,6 +70,7 @@ void runMobileApp() async {
     ],
     child: MaterialApp(
       title: 'BairesDev TimeTracker',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
       initialRoute: initialRoute,
       routes: <String, WidgetBuilder>{
