@@ -3,10 +3,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_native_timezone/flutter_native_timezone.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:timetracker_mobile/mobile/settings/settings_widget.dart';
+import 'package:timetracker_mobile/mobile/graph/graph_content.dart';
+import 'package:timetracker_mobile/mobile/home_page/home_content.dart';
+import 'package:timetracker_mobile/mobile/settings/settings_content.dart';
 import 'package:timetracker_mobile/shared/providers/settings_provider.dart';
 import 'package:timetracker_mobile/shared/providers/timetracker_provider.dart';
 import 'add_new_entry/add_new_entry_widget.dart';
+import 'fluid_nav/fluid_nav_bar.dart';
+import 'flutter_flow/flutter_flow_theme.dart';
+import 'graph/scaling_info.dart';
 import 'home_page/home_page_widget.dart';
 import 'package:timetracker_mobile/shared/notifications.dart';
 import 'package:timezone/data/latest.dart' as tz;
@@ -68,18 +73,79 @@ void runMobileApp() async {
       ChangeNotifierProvider(create: (_) => TimeTrackerProvider(prefs)),
       ChangeNotifierProvider(create: (_) => SettingsProvider(prefs)),
     ],
-    child: MaterialApp(
+    child: MainPage(),
+  ));
+}
+
+class MainPage extends StatefulWidget {
+  @override
+  State createState() {
+    return _MainPageState();
+  }
+}
+
+class _MainPageState extends State {
+  Widget _child;
+
+  @override
+  void initState() {
+    _child = HomeContent();
+    super.initState();
+  }
+
+  @override
+  Widget build(context) {
+    // Build a simple container that switches content based of off the selected navigation item
+    return MaterialApp(
       title: 'BairesDev TimeTracker',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      initialRoute: initialRoute,
+      home: Scaffold(
+        backgroundColor: FlutterFlowTheme.primaryColor,
+        extendBody: true,
+        body: _child,
+        bottomNavigationBar: FluidNavBar(onChange: _handleNavigationChange),
+      ),
       routes: <String, WidgetBuilder>{
-        HomePageWidget.routeName: (_) =>
-            HomePageWidget(notificationAppLaunchDetails),
+        // HomePageWidget.routeName: (_) => MainPage(),
         AddNewEntryWidget.routeName: (_) =>
-            AddNewEntryWidget(selectedNotificationPayload),
-        SettingsWidget.routeName: (_) => SettingsWidget()
+            AddNewEntryWidget(selectedNotificationPayload)
       },
-    ),
-  ));
+    );
+  }
+
+  // child: MaterialApp(
+
+  //     debugShowCheckedModeBanner: false,
+  //     theme: ThemeData(primarySwatch: Colors.blue),
+  //     initialRoute: initialRoute,
+  //     routes: <String, WidgetBuilder>{
+  //       HomePageWidget.routeName: (_) => MainPage(),
+  //       AddNewEntryWidget.routeName: (_) =>
+  //            AddNewEntryWidget(selectedNotificationPayload),
+  //        SettingsWidget.routeName: (_) => SettingsWidget()
+  //     },
+  //   ),
+
+  void _handleNavigationChange(int index) {
+    setState(() {
+      switch (index) {
+        case 0:
+          _child = HomeContent();
+          break;
+        case 1:
+          _child = GraphContent();
+          break;
+        case 2:
+          _child = SettingsContent();
+          break;
+      }
+      _child = AnimatedSwitcher(
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        duration: Duration(milliseconds: 500),
+        child: _child,
+      );
+    });
+  }
 }
