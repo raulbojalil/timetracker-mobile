@@ -1,6 +1,6 @@
 class TimeTrackerEntry {
   final String date;
-  final String hours;
+  final double hours;
   final String assignmentType;
   final String project;
   final String description;

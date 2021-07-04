@@ -2,6 +2,7 @@ import 'package:fluent_ui/fluent_ui.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:timetracker_mobile/shared/models/timetrackerentry.dart';
 import 'package:timetracker_mobile/shared/providers/timetracker_provider.dart';
 
 class Entries extends StatelessWidget {
@@ -11,6 +12,16 @@ class Entries extends StatelessWidget {
     return description.length > length
         ? description.substring(0, length) + "..."
         : description;
+  }
+
+  areHoursComplete(TimeTrackerEntry entry, List<TimeTrackerEntry> entries) {
+    double totalHours = 0;
+    entries.where((element) => element.date == entry.date).forEach((element) {
+      totalHours += element.hours;
+    });
+
+    //Change this if you work more (or less) hours
+    return totalHours == 8;
   }
 
   @override
@@ -106,112 +117,115 @@ class Entries extends StatelessWidget {
                   child: Text(
                       "Please go to the Settings page to fill in the missing data required to fetch the time tracker entries"),
                 )
-              : ListView(
-                  padding: EdgeInsets.only(
-                    bottom: kPageDefaultVerticalPadding,
-                    left: PageHeader.horizontalPadding(context),
-                    right: PageHeader.horizontalPadding(context),
-                  ),
-                  controller: scrollController,
-                  children: [
-                    timeTracker.list.length == 0
-                        ? TappableListTile(title: Text("No items found"))
-                        : Wrap(children: [
-                            for (var item in timeTracker.list)
-                              TappableListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor:
-                                      Color.fromARGB(255, 0x02, 0x72, 0xB1),
-                                  child:
-                                      Text(item.date.split("/").elementAt(0)),
-                                ),
-                                title:
-                                    Text(shortenDescription(item.description)),
-                                subtitle: Text(
-                                    "${item.hours} hour(s) on ${item.date}"),
-                                onTap: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return ContentDialog(
-                                        title: Text('Entry details'),
-                                        content: Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(item.description),
-                                            Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  0, 10, 0, 0),
-                                              child: Row(
-                                                children: [
-                                                  Text("Project: ",
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                  Text(item.project),
-                                                ],
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  0, 10, 0, 0),
-                                              child: Row(
-                                                children: [
-                                                  Text("Assignment Type: ",
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                  Text(item.assignmentType),
-                                                ],
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  0, 10, 0, 0),
-                                              child: Row(
-                                                children: [
-                                                  Text("Date: ",
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                  Text(item.date),
-                                                ],
-                                              ),
-                                            ),
-                                            Padding(
-                                              padding: EdgeInsets.fromLTRB(
-                                                  0, 10, 0, 0),
-                                              child: Row(
-                                                children: [
-                                                  Text("Hours: ",
-                                                      style: TextStyle(
-                                                          fontWeight:
-                                                              FontWeight.bold)),
-                                                  Text(item.hours),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        actions: [
-                                          Button(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: Text("Close"),
-                                          )
-                                        ],
-                                      );
-                                    },
-                                  );
-                                },
+              : (timeTracker.list.length == 0
+                  ? Center(
+                      child: Text(
+                          "No items found. Add your first item by using the + button."),
+                    )
+                  : ListView(
+                      padding: EdgeInsets.only(
+                        bottom: kPageDefaultVerticalPadding,
+                        left: PageHeader.horizontalPadding(context),
+                        right: PageHeader.horizontalPadding(context),
+                      ),
+                      controller: scrollController,
+                      children: [
+                        Wrap(children: [
+                          for (var item in timeTracker.list)
+                            TappableListTile(
+                              leading: CircleAvatar(
+                                backgroundColor:
+                                    areHoursComplete(item, timeTracker.list)
+                                        ? Color.fromARGB(255, 0x02, 0x72, 0xB1)
+                                        : Color.fromARGB(255, 255, 0, 0),
+                                child: Text(item.date.split("/").elementAt(0)),
                               ),
-                          ]),
-                  ],
-                )),
+                              title: Text(shortenDescription(item.description)),
+                              subtitle:
+                                  Text("${item.hours} hour(s) on ${item.date}"),
+                              onTap: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return ContentDialog(
+                                      title: Text('Entry details'),
+                                      content: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(item.description),
+                                          Padding(
+                                            padding: EdgeInsets.fromLTRB(
+                                                0, 10, 0, 0),
+                                            child: Row(
+                                              children: [
+                                                Text("Project: ",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                Text(item.project),
+                                              ],
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.fromLTRB(
+                                                0, 10, 0, 0),
+                                            child: Row(
+                                              children: [
+                                                Text("Assignment Type: ",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                Text(item.assignmentType),
+                                              ],
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.fromLTRB(
+                                                0, 10, 0, 0),
+                                            child: Row(
+                                              children: [
+                                                Text("Date: ",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                Text(item.date),
+                                              ],
+                                            ),
+                                          ),
+                                          Padding(
+                                            padding: EdgeInsets.fromLTRB(
+                                                0, 10, 0, 0),
+                                            child: Row(
+                                              children: [
+                                                Text("Hours: ",
+                                                    style: TextStyle(
+                                                        fontWeight:
+                                                            FontWeight.bold)),
+                                                Text(item.hours.toString()),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      actions: [
+                                        Button(
+                                          onPressed: () {
+                                            Navigator.pop(context);
+                                          },
+                                          child: Text("Close"),
+                                        )
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                        ]),
+                      ],
+                    ))),
     );
   }
 }

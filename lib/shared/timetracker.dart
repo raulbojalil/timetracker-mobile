@@ -68,8 +68,12 @@ class TimeTracker {
     for (var row in tableRows) {
       final cols = row.getElementsByTagName("td");
       if (cols.length > 0 && cols[0].innerHtml != "&nbsp;") {
-        list.add(TimeTrackerEntry(cols[0].innerHtml, cols[1].innerHtml,
-            cols[2].innerHtml, cols[3].innerHtml, cols[4].innerHtml));
+        list.add(TimeTrackerEntry(
+            cols[0].innerHtml,
+            double.parse(cols[1].innerHtml),
+            cols[2].innerHtml,
+            cols[3].innerHtml,
+            cols[4].innerHtml));
       }
     }
 

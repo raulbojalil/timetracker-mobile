@@ -21,8 +21,7 @@ runDesktopApp() async {
   ));
   doWhenWindowReady(() {
     final win = appWindow;
-    win.minSize = Size(755, 640);
-    win.size = Size(755, 640);
+    win.minSize = Size(900, 640);
     win.alignment = Alignment.center;
     win.title = "BairesDev Time Tracker";
     win.show();
