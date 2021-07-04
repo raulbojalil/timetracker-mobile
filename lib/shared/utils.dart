@@ -1,4 +1,7 @@
+import 'dart:math';
 import 'dart:typed_data';
+
+final _random = new Random();
 
 double lerp(double x, double y, double s) {
   return x * (1 - s) + y * s;
@@ -36,3 +39,5 @@ void injectColor(int i, Int32List list, int color) {
   list[i + 0] = list[i + 1] =
       list[i + 2] = list[i + 3] = list[i + 4] = list[i + 5] = color;
 }
+
+int randRange(int min, int max) => min + _random.nextInt(max - min);

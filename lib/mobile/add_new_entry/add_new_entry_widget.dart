@@ -1,6 +1,12 @@
+import 'dart:math';
+
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:lottie/lottie.dart';
+import 'package:timetracker_mobile/mobile/particles/particle_field.dart';
+import 'package:timetracker_mobile/mobile/particles/particle_field_painter.dart';
 import 'package:timetracker_mobile/shared/providers/timetracker_provider.dart';
+import 'package:timetracker_mobile/shared/utils.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -20,11 +26,14 @@ class AddNewEntryWidget extends StatefulWidget {
   _AddNewEntryWidgetState createState() => _AddNewEntryWidgetState();
 }
 
-class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
+class _AddNewEntryWidgetState extends State<AddNewEntryWidget>
+    with SingleTickerProviderStateMixin {
   TextEditingController dateController;
   TextEditingController hoursController;
   TextEditingController descriptionController;
   bool saved = false;
+  ParticleField _particleField;
+  Ticker _ticker;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -32,12 +41,30 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
 
   @override
   void initState() {
-    super.initState();
     dateController = TextEditingController();
     dateController.text =
         DateFormat('dd/MM/yyyy').format(DateTime.now()).toString();
     hoursController = TextEditingController();
     descriptionController = TextEditingController();
+    _particleField = new ParticleField();
+    _ticker = createTicker(_particleField.tick)..start();
+
+    super.initState();
+  }
+
+  _playParticleAnimation() async {
+    _explode(0xffFF0000);
+    _explode(0xff009BFF);
+    await Future.delayed(Duration(milliseconds: 1000));
+    _explode(0xffFF0000);
+    _explode(0xff009BFF);
+  }
+
+  _explode(color) {
+    int x = randRange(100, 200);
+    int y = randRange(100, 200);
+
+    _particleField.pointExplosion(x, y, 100, color);
   }
 
   @override
@@ -50,29 +77,41 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
         child: timeTracker.saving
             ? Center(child: Text("Saving, please wait..."))
             : (saved
-                ? Container(
-                    width: double.infinity,
-                    color: FlutterFlowTheme.primaryColor,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Lottie.asset("assets/lottie/40740-success-icon.json",
-                            repeat: false),
-                        Padding(
-                            padding: EdgeInsets.all(20),
-                            child: Text(
-                                "Your new entry has been\nsaved successfully!",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 30, color: Color(0xFFF5F5F5))))
-                      ],
-                    ),
+                ? Stack(
+                    children: <Widget>[
+                      Positioned.fill(
+                          child: Center(
+                              child: Container(
+                        width: double.infinity,
+                        color: FlutterFlowTheme.primaryColor,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Lottie.asset(
+                                "assets/lottie/40740-success-icon.json",
+                                repeat: false),
+                            Padding(
+                                padding: EdgeInsets.all(20),
+                                child: Text(
+                                    "Your new entry has been\nsaved successfully!",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 30,
+                                        color: Color(0xFFF5F5F5))))
+                          ],
+                        ),
+                      ))),
+                      Positioned.fill(
+                          child: IgnorePointer(
+                        child: CustomPaint(
+                            painter: ParticleFieldPainter(_particleField)),
+                      )),
+                    ],
                   )
                 : Padding(
-                    padding: EdgeInsets.fromLTRB(10, 0, 10, 1),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.max,
+                    padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+                    child: ListView(
                       children: [
                         Row(
                           mainAxisSize: MainAxisSize.max,
@@ -99,8 +138,10 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
                                 setState(() {
                                   saved = true;
                                 });
+                                _playParticleAnimation();
                                 await Future.delayed(Duration(seconds: 3));
                                 timeTracker.loadTimeTrackerEntries();
+                                _ticker.dispose();
                                 Navigator.pop(context);
                               },
                               icon: Icon(
@@ -120,6 +161,7 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
                           padding: EdgeInsets.fromLTRB(0, 20, 0, 0),
                           child: TextFormField(
                             controller: dateController,
+                            readOnly: true,
                             obscureText: false,
                             decoration: InputDecoration(
                               labelText: 'Date',
@@ -251,8 +293,7 @@ class _AddNewEntryWidgetState extends State<AddNewEntryWidget> {
                           ),
                         )
                       ],
-                    ),
-                  )),
+                    ))),
       ),
     );
   }

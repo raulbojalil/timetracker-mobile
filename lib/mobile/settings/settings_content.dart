@@ -23,15 +23,13 @@ class _SettingsWidgetState extends State<SettingsContent> {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingsProvider>();
-    final timeTracker = context.watch<TimeTrackerProvider>();
 
     return Scaffold(
       key: scaffoldKey,
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.fromLTRB(10, 0, 10, 1),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
+          padding: EdgeInsets.fromLTRB(10, 0, 10, 10),
+          child: ListView(
             children: [
               Row(
                 mainAxisSize: MainAxisSize.max,

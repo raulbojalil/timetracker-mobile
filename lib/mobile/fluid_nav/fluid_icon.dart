@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:timetracker_mobile/mobile/flutter_flow/flutter_flow_theme.dart';
 import 'dart:ui' as ui;
 
 // Users of this class shouldn't have to explicitly import fluid_icon_data
@@ -54,7 +55,7 @@ class _FluidFillIconPainter extends CustomPainter {
       ..strokeWidth = 2.4
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = Colors.black;
+      ..color = FlutterFlowTheme.primaryColor;
 
     // Scale around (0, height / 2)
     canvas.translate(0.0, size.height / 2);

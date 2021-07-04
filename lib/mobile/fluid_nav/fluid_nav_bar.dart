@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:timetracker_mobile/mobile/flutter_flow/flutter_flow_theme.dart';
 
 import './fluid_icon.dart';
 import './fluid_button.dart';
@@ -97,7 +98,7 @@ class _FluidNavBarState extends State<FluidNavBar>
           begin: Curves.easeInExpo.transform(_yController.value),
           end: inCurve.transform(_yController.value),
         ).transform(_yController.velocity.sign * 0.5 + 0.5),
-        Colors.white,
+        FlutterFlowTheme.primaryColor,
       ),
     );
   }

@@ -95,7 +95,8 @@ class _MainPageState extends State {
 
   @override
   Widget build(context) {
-    // Build a simple container that switches content based of off the selected navigation item
+    final timeTracker = context.watch<TimeTrackerProvider>();
+
     return MaterialApp(
       title: 'BairesDev TimeTracker',
       debugShowCheckedModeBanner: false,
@@ -104,7 +105,9 @@ class _MainPageState extends State {
         backgroundColor: FlutterFlowTheme.primaryColor,
         extendBody: true,
         body: _child,
-        bottomNavigationBar: FluidNavBar(onChange: _handleNavigationChange),
+        bottomNavigationBar: FluidNavBar(onChange: (index) {
+          _handleNavigationChange(index, timeTracker);
+        }),
       ),
       routes: <String, WidgetBuilder>{
         // HomePageWidget.routeName: (_) => MainPage(),
@@ -127,11 +130,12 @@ class _MainPageState extends State {
   //     },
   //   ),
 
-  void _handleNavigationChange(int index) {
+  void _handleNavigationChange(int index, TimeTrackerProvider timetracker) {
     setState(() {
       switch (index) {
         case 0:
           _child = HomeContent();
+          timetracker.loadTimeTrackerEntries();
           break;
         case 1:
           _child = GraphContent();
