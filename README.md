@@ -15,9 +15,6 @@ After running the application for the first time, you will have to fill in all t
 
 ### Android
 
-![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/image_1.png?raw=true "timetracker1")
-![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/image_2.png?raw=true "timetracker2")
-
 ![TimeTracker](https://github.com/raulbojalil/timetracker-mobile/blob/master/androidapp.gif?raw=true "timetrackerandroid")
 
 
